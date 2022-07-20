@@ -10,7 +10,7 @@ def poly_interpolate(index, matrics):
     for row in matrics:
         poly = lagrange(index, row).coef[::-1]
         res.append(poly)
-    return np.array(res)
+    return np.array(res, dtype=object)
 
 
 def polymuln(lst):
@@ -29,11 +29,12 @@ def QAP(s, A, B, C):
     Q = P.polysub(P.polymul(L, R), O)
     print(f"T:\n {Q}")
     assert len(L) == len(R) == len(O)
-    ns = [[-(1 + i), 1] for i, _ in enumerate(range(len(L)))]
-    print(f"ns:\n{ns}")
-    T = polymuln(ns)
-    print(f"T:\n {T}")
-    return P.polydiv(Q, T)
+    return P.polydiv(Q, Z(len(L)))
+
+
+def Z(n):
+    ns = [[-(1 + i), 1] for i, _ in enumerate(range(n))]
+    return polymuln(ns)
 
 
 def main(s, A, B, C):
@@ -90,7 +91,7 @@ C = np.array(
     ]
 )
 
-print(main(s, A, B, C))
+# print(main(s, A, B, C))
 
 # A = np.array(
 #     [

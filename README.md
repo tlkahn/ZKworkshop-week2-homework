@@ -218,7 +218,7 @@ def poly_interpolate(index, matrics):
     for row in matrics:
         poly = lagrange(index, row).coef[::-1]
         res.append(poly)
-    return np.array(res)
+    return np.array(res, dtype=object)
 
 def polymuln(lst):
     if len(lst) == 0:
@@ -235,11 +235,11 @@ def QAP(s, A, B, C):
     Q = P.polysub(P.polymul(L, R), O)
     print(f"T:\n {Q}")
     assert len(L) == len(R) == len(O)
-    ns = [[-(1 + i), 1] for i, _ in enumerate(range(len(L)))]
-    print(f"ns:\n{ns}")
-    T = polymuln(ns)
-    print(f"T:\n {T}")
-    return P.polydiv(Q, T)
+    return P.polydiv(Q, Z(len(L)))
+
+def Z(n):
+    ns = [[-(1 + i), 1] for i, _ in enumerate(range(n))]
+    return polymuln(ns)
 
 def main(s, A, B, C):
     x = np.arange(1, len(A) + 1)
@@ -293,7 +293,7 @@ C = np.array(
     ]
 )
 
-print(main(s, A, B, C))
+# print(main(s, A, B, C))
 
 # A = np.array(
 #     [
@@ -371,9 +371,8 @@ l \\
 r \\
 \sim{out} \\
 \end{pmatrix}
-
+=
 \begin{pmatrix}
-1 & x & x^2 & x^3 & x^4 & x5 & x6 \\
 -7.00e+01&  1.64e+02& -1.41e+02&  5.87e+01& -1.26e+01&  1.33e+00& -5.56e-02 \\
 7.00e+00& -1.74e+01&  1.90e+01& -9.75e+00&  2.47e+00& -3.00e-01& 1.39e-02 \\
 3.50e+01& -7.91e+01&  6.48e+01& -2.54e+01&  5.15e+00& -5.21e-01& 2.08e-02 \\
@@ -384,6 +383,10 @@ r \\
 1.00e+00& -2.45e+00&  2.26e+00& -1.02e+00&  2.43e-01& -2.92e-02& 1.39e-03 \\
 0&0&0&0&0&0&0 \\
 0&0&0&0&0&0&0 \\
+\end{pmatrix}
+\cdot
+\begin{pmatrix}
+1 \\ x \\ x^2 \\ x^3 \\ x^4 \\ x5 \\ x6 
 \end{pmatrix}$
 
 $B$ variable polynomials with coefficients:
@@ -400,10 +403,13 @@ l \\
 r \\
 \sim{out} \\
 \end{pmatrix}
-
+=
 \begin{pmatrix}
-1 & x & x^2 & x^3 & x^4 & x5 & x6 \\
 7.00e+00& -1.12e+01&  7.09e+00& -2.31e+00&  4.10e-01& -3.75e-02& 1.39e-03 \\0&0&0&0&0&0&0 \\-3.50e+01&  8.20e+01& -7.07e+01&  2.93e+01& -6.28e+00&  6.67e-01& -2.78e-02 \\3.50e+01& -7.91e+01&  6.48e+01& -2.54e+01&  5.15e+00& -5.21e-01& 2.08e-02 \\-2.10e+01&  4.40e+01& -3.27e+01&  1.18e+01& -2.25e+00&  2.17e-01& -8.33e-03 \\2.10e+01& -5.02e+01&  4.47e+01& -1.93e+01&  4.31e+00& -4.79e-01& 2.08e-02 \\-7.00e+00&  1.70e+01& -1.54e+01&  6.83e+00& -1.58e+00&  1.83e-01& -8.33e-03 \\0&0&0&0&0&0&0 \\1.00e+00& -2.45e+00&  2.26e+00& -1.02e+00&  2.43e-01& -2.92e-02& 1.39e-03 \\0&0&0&0&0&0&0 \\
+\end{pmatrix}
+\cdot
+\begin{pmatrix}
+1 \\ x \\ x^2 \\ x^3 \\ x^4 \\ x5 \\ x6 
 \end{pmatrix}$
 
 $C$ variable polynomials with coefficients:
@@ -420,9 +426,8 @@ l \\
 r \\
 \sim{out} \\
 \end{pmatrix}
-
+=
 \begin{pmatrix}
-1 & x & x^2 & x^3 & x^4 & x5 & x6 \\
 7.00e+00& -1.12e+01&  7.09e+00& -2.31e+00&  4.10e-01& -3.75e-02& 1.39e-03 \\
 0&0&0&0&0&0&0 \\
 0&0&0&0&0&0&0 \\
@@ -433,6 +438,10 @@ r \\
 2.10e+01& -5.02e+01&  4.47e+01& -1.93e+01&  4.31e+00& -4.79e-01& 2.08e-02 \\
 -7.00e+00&  1.70e+01& -1.54e+01&  6.83e+00& -1.58e+00&  1.83e-01& -8.33e-03 \\
 1.00e+00& -2.45e+00&  2.26e+00& -1.02e+00&  2.43e-01& -2.92e-02& 1.39e-03 \\
+\end{pmatrix}
+\cdot
+\begin{pmatrix}
+1 \\ x \\ x^2 \\ x^3 \\ x^4 \\ x5 \\ x6 
 \end{pmatrix}$
 
 ### Q2
@@ -442,7 +451,7 @@ Continuing with Q1, solve for the left operand polynomial L(X), the right operan
 > Note: The polynomial solution problems involved in Q1, Q2 are the very core of Groth16, Pinocchio
 > 
 
-### A3
+### A2
 
 Run the above Python code and the logs returned polynomials with coefficients:
 
@@ -467,6 +476,91 @@ Since $1,2,\dots,10$ are $x$ values used in Lagrange interpolation, the curve $L
 
 Convert the function into a system of circuit constrained equations (addition, multiplication, input, output, etc.), then convert these circuit constraints into a system of circuit constrained equations of the form defined by Plonk as "(qL) - a + (qR) - b + (qO) - c + (qM) - (a * b) + (qC) = 0", and finally perform a polynomial interpolation (1,2,3,...) Solve for: qL(x), qR(x), ... , qM(x)
 
+### A3
+
+Considering all inputs as private, we get these 7 PLONK gates:
+
+$\begin{pmatrix}
+0 a_1 + 0 b_1 + -1 c_1 + -1 a_1 b_1 + 0 = 0 \\
+0 a_2 + 0 b_2 + 0 c_2 + 1 a_2 b_2 + 0 = 0 \\
+0 a_3 + 0 b_3 + -1 c_3 + 1 a_3 b_3 + 0 = 0 \\
+2 a_4 + -1 b_4 + -1 c_4 + 0 a_4 b_4 + 0 = 0 \\
+0 a_5 + 0 b_5 + -1 c_5 + 1 a_5 b_5 + 0 = 0 \\
+0 a_6 + 0 b_6 + -1 c_6 + 1 a_6 b_6 + 0 = 0 \\
+1 a_7 + 1 b_7 + -1 c_7 + 0 a_7 b_7 + 0 = 0 \\
+\end{pmatrix}$
+
+We collect parameters into vectors:
+
+$q_L = (0,0,0,2,0,0,1)^T \\
+q_R = (0,0,0,-1,0,0,1)^T \\
+q_O = (-1,0,-1,-1,-1,-1,-1)^T \\
+q_M = (-1,1,1,0,1,1,0)^T \\
+q_C = (0,0,0,0,0,0,0)^T$
+
+$\mathbf{a} = (0, 0, 11, 11, 55, 17, 0)^T \\
+\mathbf{b} = (1, -1, 5, 5, 0, -1, -17)^T \\
+\mathbf{c} = (-1, 0, 55, 17, 0, -17, -17)^T$
+
+Use the following Python code:
+
+```python
+from scipy.interpolate import lagrange
+import numpy as np
+from numpy.polynomial import polynomial as P
+from a1 import poly_interpolate, Z
+
+np.set_printoptions(precision=2)
+
+Q = np.array(
+    [
+        [0, 0, 0, 2, 0, 0, 1],
+        [0, 0, 0, -1, 0, 0, 1],
+        [-1, 0, -1, -1, -1, -1, -1],
+        [-1, 1, 1, 0, 1, 1, 0],
+        [0, 0, 0, 0, 0, 0, 0],
+    ]
+)
+ABC = np.array(
+    [
+        [0, 0, 11, 11, 55, 17, 0],
+        [1, -1, 5, 5, 0, -1, -17],
+        [-1, 0, 55, 17, 0, -17, -17],
+    ]
+)
+
+def PLONK(Q, ABC):
+    index = np.arange(1, np.shape(Q)[1] + 1)
+    q_L, q_R, q_O, q_M, q_C = [
+        P.Polynomial(coeffs) for coeffs in poly_interpolate(index, Q)
+    ]
+
+    a, b, c = [P.Polynomial(coeffs) for coeffs in poly_interpolate(index, ABC)]
+
+    # qL(x) - a(x) + qR(x) - b(x) + qO(x) - c(x) + qM(x) - (a(x) * b(x)) + qC(x)
+    T = q_L - a + q_R - b + q_O - c + q_M - (a * b) + q_C
+    z = Z(len(index))
+    return P.polydiv(T.coef, z)
+```
+
+we get:
+
+$\begin{pmatrix}
+q_L(x)\\q_R(x)\\q_O(x)\\q_M(x)\\q_C(x)
+\end{pmatrix}
+=
+\begin{pmatrix}
+-6.90e+01&  1.62e+02& -1.39e+02&  5.76e+01& -1.23e+01&  1.30e+00& -5.42e-02 \\
+3.60e+01& -8.45e+01&  7.30e+01& -3.04e+01&  6.52e+00& -6.96e-01& 2.92e-02 \\
+-2.20e+01&  4.40e+01& -3.27e+01&  1.18e+01& -2.25e+00&  2.17e-01& -8.33e-03 \\
+2.10e+01& -5.72e+01&  5.43e+01& -2.37e+01&  5.22e+00& -5.62e-01& 2.36e-02 \\
+0&0&0&0&0&0&0 \\
+\end{pmatrix}
+\cdot
+\begin{pmatrix}
+1\\x\\x^2\\x^3\\x^4\\x^5\\x^6
+\end{pmatrix}$
+
 ### Q4
 
 Continuing with Q3, assign the variables (x=1, y=2, z=5) and then interpolate (1,2,3,...) Solve for: a(x), b(x), c(x), then verify if qL(x) - a(x) + qR(x) - b(x) + qO(x) - c(x) + qM(x) - (a(x) * b(x)) + qC(x) can be obtained by the target polynomial T(x) = (x-1)(x-2)(x-3)...
@@ -474,19 +568,29 @@ Continuing with Q3, assign the variables (x=1, y=2, z=5) and then interpolate (1
 > Note: The polynomial solution problems involved in Q3, Q4 are fundamentals of Plonk.
 > 
 
-## Assignment 2. Classical Protocol Analysis
+### A4
 
-Choose any one protocol from Groth16, Plonk, Stark and complete the following questions.
+Run the code [above](https://www.notion.so/Week-2-b3d4c277e0b94346a235c0fc81381dac), we can get $a(x),b(x),c(x)$:
 
-### Q1
+$\begin{pmatrix}
+a(x)\\b(x)\\c(x)
+\end{pmatrix}
+=
+\begin{pmatrix}
+1.04e+03 & -2.44e+03 & 2.13e+03 & -9.00e+02 & 1.98e+02 & -2.16e+01 & 9.28e-01 & \\
+1.80e+01 & -1.58e+01 & -1.24e+01 & 1.61e+01 & -5.55e+00 & 7.87e-01 & -4.03e-02 & \\
+1.42e+03 & -3.19e+03 & 2.58e+03 & -9.95e+02 & 1.99e+02 & -1.99e+01 & 7.90e-01 & \\
+\end{pmatrix}
+\cdot
+\begin{pmatrix}
+1\\x\\x^2\\x^3\\x^4\\x^5\\x^6
+\end{pmatrix}$
 
-1. Please describe the main features and workflow of the protocol
-2. If the protocol produces public parameters in if there is a trust-setup step, point out which circuit-independent public parameters they provide and which circuit-related parameters? How are these public parameters produced, briefly describe the implementation idea, and are there security issues in the application process?
-3. If the protocol does not have a trust-setup step, please explain the basic principles of proof and verification for implementing no public parameters, and further analyze the protocol
+And we can check the divisibility of $Z \mid qL(x) - a(x) + qR(x) - b(x) + qO(x) - c(x) + qM(x) - (a(x) * b(x)) + qC(x)$  by 
 
-### Q2
-
-How does the protocol achieve zero-knowledge in the computation process (proof, verification)? Please analyze the implementation idea and construction method to achieve zero-knowledge, and analyze whether it satisfies perfect zero-knowledge.
+```python
+P.polydiv(T.coef, z) # z = T(x) = (x-1)(x-2)(x-3)...
+```
 
 ## Assignment 3. Classical Protocol Engineering Practice
 
@@ -498,7 +602,6 @@ def f(x, y, z):
     return y*z
   return 2y - z
 }
-
 ```
 
 prover owns private variables x, y, z with values (x = 1, y = 2, z = 5), please choose one open source libraries or toolkits of Groth16, Plonk, Stark protocol, and use one of the protocols to complete the verifiable computation of function `f(x,y,z)` as above.
@@ -510,64 +613,17 @@ Engineering Assignment Requirements:
 3. if there is an output of the calculation step, please give a screenshot of the result
 4. please provide the project practice repository, specify the commit hash
 
-### A3
+### Answer
 
-## Deadline
-
-2022.07.21
-
----
-
-## Assignment Workflow
-
-The assignment workflow is as follows:
-
-1. Follow the assignment requirements to complete the assignment and output the assignment PDF
-2. Send the assignment to the course administrator via Discord private message (before the assignment submission deadline)
-3. Get the assignment approval result via email or Discord (before the next class starts)
-
----
-
-## Assignment Requirements
-
-### File format
-
-The output format of the assignment is PDF, the file naming format is: {user registration name}-{assignment name}-yymmdd.pdf, for example: Alice-zkGame-20220714.pdf
-
-### Assignment content
-
-- Basic Information
-
-[Untitled](https://www.notion.so/32724cea604144b19a63ee295a1b46dc)
-
-- Answers to Assignment Questions
-
-> Please do not copy the assignment (it will result in a zero score), and if you use open source code or resources, please cite them.
-> 
-
----
-
-## Scoring Rules
-
-Comprehensive evaluation according to the scoring points to encourage innovation and optimization.
-
-Scoring points:
-
-- Correctness
+1. I use `circom 2` with `snarkjs`. 
+2. I follow the steps:
+    1. Post input signals in `input.json`
+    2. Generate supplementary files following procedures described [here](https://www.samsclass.info/141/proj/C523.htm)
+    3. Generate witness by running `./circuit_js/witness_calculator.js`
+    4. Generate proof and public signals using PLONK
+    5. Use `verification_key.json` to verify the proof
+3. Log the proof and verification result
     
-    The calculation process is rigorous and the results are correct
+    ![Screen Shot 2022-07-20 at 15.51.42.png](Week%202%201f7ae94f2f404d36b42a0aea0cfe7041/Screen_Shot_2022-07-20_at_15.51.42.png)
     
-- Completeness
-Documented instructions for use, complete operationalization
-- Completeness
-Excellent documentation, beautiful interface, user-friendly
-- Interface friendly
-Simple and easy to use interface
-- Practicality
-Good practicality, can be applied to related fields
-- Innovation
-Originality, novelty, security or performance improvement
-- Theoretical depth
-Comprehensive and integrated analysis, in-depth exploration
-
-![Untitled](Week%202%201f7ae94f2f404d36b42a0aea0cfe7041/Untitled%201.png)
+4. `main.js`: Commit hash `4bba17dbb299f0ac05096441554e0b8db24ab7fe` from Github repo: [https://github.com/tlkahn/zkworkshop-w2-a3](https://github.com/tlkahn/zkworkshop-w2-a3)
